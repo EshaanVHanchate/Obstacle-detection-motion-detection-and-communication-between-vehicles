@@ -1,18 +1,21 @@
 #include <ESP8266WiFi.h>
-char ssid[] = "Wemos_AP";           // SSID of your AP
-char pass[] = "Wemos_comm";         // password of your AP
+char ssid[] = "Metamorphosis";           // SSID of your AP
+char pass[] = "symbiosis";         // password of your AP
 IPAddress server(192,168,4,15);     // IP address of the AP
 #define pin 16
 int IRsensor = 16;
 #define pin 14
-int led = 14;
+int myLed = 14;
+#define pin 12
+int otherLed = 12;
 WiFiClient client;
 void setup() {
   Serial.begin(9600);
   pinMode(IRsensor,INPUT);
-  pinMode(led,OUTPUT);
+  pinMode(myLed,OUTPUT);
+  pinMode(otherLed,OUTPUT);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, pass);           // connects to the WiFi AP
+  WiFi.begin(ssid,pass);           // connects to the WiFi AP
   Serial.println();
   Serial.println("Connection to the AP");
   while (WiFi.status() != WL_CONNECTED) {
@@ -21,7 +24,6 @@ void setup() {
   }
   Serial.println();
   Serial.println("Connected");
-  Serial.println("station_bare_01.ino");
   Serial.print("LocalIP:"); Serial.println(WiFi.localIP());
   Serial.println("MAC:" + WiFi.macAddress());
   Serial.print("Gateway:"); Serial.println(WiFi.gatewayIP());
@@ -35,10 +37,25 @@ void loop() {
   Serial.println("********************************");
   Serial.print("My IR val: ");
   Serial.println(IrVal);
-  Serial.print("Byte sent to the AP: ");
-  Serial.println(client.print(String(IrVal)+"\r"));
+  client.print(String(IrVal)+"\r");
   String answer = client.readStringUntil('\r');
-  Serial.println(" Sensor value from the AP: " + answer);
+  Serial.println(" Sensor value from the server: " + answer);
+  if(IrVal == 1)
+  {
+    digitalWrite(myLed,LOW);
+  }
+  else if(IrVal == 0)
+  {
+    digitalWrite(myLed,HIGH);
+  }
+  if( answer == "1")
+  {
+    digitalWrite(otherLed,LOW);
+  }
+  else if( answer == "0")
+  {
+    digitalWrite(otherLed,HIGH);
+  }
   client.flush();
   client.stop();
   delay(2000);
