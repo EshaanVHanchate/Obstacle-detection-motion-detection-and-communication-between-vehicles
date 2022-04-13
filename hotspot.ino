@@ -5,17 +5,19 @@ IPAddress mask = (255, 255, 255, 0);
 #define pin 16
 int IRsensor = 16;
 #define pin 14
-int led = 14;
+int myLed = 14;
+#define pin 12
+int otherLed = 12;
 void setup() {
  Serial.begin(9600);
  pinMode(IRsensor,INPUT);
- pinMode(led,OUTPUT);
+ pinMode(myLed,OUTPUT);
+ pinMode(otherLed,OUTPUT);
  WiFi.mode(WIFI_AP);
- WiFi.softAP("Wemos_AP", "Wemos_comm");
+ WiFi.softAP("Metamorphosis","symbiosis");
  WiFi.softAPConfig(IP, IP, mask);
  server.begin();
  Serial.println();
- Serial.println("accesspoint_bare_01.ino");
  Serial.println("Server started.");
  Serial.print("IP: "); Serial.println(WiFi.softAPIP());
  Serial.print("MAC:"); Serial.println(WiFi.softAPmacAddress());
@@ -26,12 +28,25 @@ void loop() {
  String request = client.readStringUntil('\r');
  int IrVal = digitalRead(IRsensor);
  Serial.println("********************************");
- Serial.println("From the station: " + request);
  client.flush();
- Serial.print("Byte sent to the station: ");
- Serial.println(client.println(String(IrVal) + "\r"));
- Serial.print("Sensor Value from other: ");
- Serial.println(request);
+ client.println(String(IrVal) + "\r");
+ Serial.println("Sensor Value from client: " + request);
  Serial.print("My IR value: ");
  Serial.println(IrVal);
+ if(IrVal == 1)
+ {
+  digitalWrite(myLed,LOW);
+ }
+ else if(IrVal == 0)
+ {
+  digitalWrite(myLed,HIGH);
+ }
+ if( request == "1")
+ {
+  digitalWrite(otherLed,LOW);
+ }
+ else if( request == "0")
+ {
+  digitalWrite(otherLed,HIGH);
+ }
 }
